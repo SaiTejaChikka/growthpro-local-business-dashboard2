@@ -29,7 +29,7 @@ function DashboardApp() {
     setIsLoading(true);
     
     try {
-      const response = await fetch(`${API_BASE_URL}/business-data`, {
+      const response = await fetch('https://growthpro-local-business-dashboard2-one.vercel.app/business-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: businessName, location })
