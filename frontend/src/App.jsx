@@ -4,7 +4,7 @@ import MainTitle from './components/MainTitle';
 import BusinessInputForm from './components/BusinessInputForm';
 import ResultsSection from './components/ResultsSection';
 
-const API_BASE_URL = 'https://growthpro-local-business-dashboard2-one.vercel.app/';
+const API_BASE_URL = 'https://growthpro-local-business-dashboard2-one.vercel.app';
 
 function DashboardApp() {
   const [businessName, setBusinessName] = useState('');
