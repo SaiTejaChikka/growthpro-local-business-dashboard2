@@ -4,39 +4,8 @@ import cors from 'cors';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Configure allowed origins
-const allowedOrigins = [
-  'https://growthpro-local-business-dashboard2.vercel.app',
-  'http://localhost:3000'
-];
-
-// Enhanced CORS configuration
-const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Blocked by CORS policy'));
-    }
-  },
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  optionsSuccessStatus: 204
-};
-
-// Apply CORS middleware FIRST
-app.use(cors(corsOptions));
-
-// Security headers middleware
-app.use((req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  next();
-});
-
-// Body parsing middleware
+// Middleware
+app.use(cors());
 app.use(express.json());
 
 // Sample SEO headlines
@@ -53,7 +22,7 @@ const headlines = [
   "Experience the Best at {name} in {location}"
 ];
 
-// Helper functions
+// Helpers
 function getRandomRating() {
   return Math.round((Math.random() * 1.5 + 3.5) * 10) / 10;
 }
@@ -64,92 +33,47 @@ function getRandomReviews() {
 
 function createHeadline(name, location) {
   const randomIndex = Math.floor(Math.random() * headlines.length);
-  return headlines[randomIndex]
-    .replace(/{name}/g, name)
-    .replace(/{location}/g, location);
+  let headline = headlines[randomIndex];
+  headline = headline.replace(/{name}/g, name);
+  headline = headline.replace(/{location}/g, location);
+  return headline;
 }
 
-// Explicit OPTIONS handler for /business-data
-app.options('/business-data', (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', allowedOrigins[0]);
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.status(204).end();
-});
-
-// POST endpoint for business data
+// POST /business-data
 app.post('/business-data', (req, res) => {
-  try {
-    // Explicitly set CORS headers for actual response
-    res.setHeader('Access-Control-Allow-Origin', allowedOrigins[0]);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  const { name, location } = req.body;
 
-    const { name, location } = req.body;
-
-    if (!name || !location) {
-      return res.status(400).json({ 
-        error: 'Both name and location are required' 
-      });
-    }
-
-    if (typeof name !== 'string' || typeof location !== 'string') {
-      return res.status(400).json({ 
-        error: 'Name and location must be strings' 
-      });
-    }
-
-    const businessData = {
-      rating: getRandomRating(),
-      reviews: getRandomReviews(),
-      headline: createHeadline(name, location)
-    };
-
-    res.json(businessData);
-  } catch (error) {
-    console.error('POST /business-data error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+  if (!name || !location) {
+    return res.status(400).json({
+      error: 'Name and location are required'
+    });
   }
+
+  const data = {
+    rating: getRandomRating(),
+    reviews: getRandomReviews(),
+    headline: createHeadline(name, location)
+  };
+
+  res.json(data);
 });
 
-// GET endpoint for headline regeneration
+// GET /regenerate-headline
 app.get('/regenerate-headline', (req, res) => {
-  try {
-    // Set CORS headers
-    res.setHeader('Access-Control-Allow-Origin', allowedOrigins[0]);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    
-    const { name, location } = req.query;
+  const { name, location } = req.query;
 
-    if (!name || !location) {
-      return res.status(400).json({ 
-        error: 'Both name and location are required' 
-      });
-    }
-
-    const newHeadline = createHeadline(
-      decodeURIComponent(name), 
-      decodeURIComponent(location)
-    );
-
-    res.json({ headline: newHeadline });
-  } catch (error) {
-    console.error('GET /regenerate-headline error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+  if (!name || !location) {
+    return res.status(400).json({
+      error: 'Name and location are required'
+    });
   }
+
+  const newHeadline = createHeadline(name, location);
+
+  res.json({ headline: newHeadline });
 });
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).send('OK');
-});
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Endpoint not found' });
-});
-
-// Start server
+// Start the server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log('✅ Allowed origins:', allowedOrigins.join(', '));
-});
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
+}); this my code edit it
