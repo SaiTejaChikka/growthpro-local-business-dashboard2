@@ -4,7 +4,7 @@ import MainTitle from './components/MainTitle';
 import BusinessInputForm from './components/BusinessInputForm';
 import ResultsSection from './components/ResultsSection';
 
-const API_BASE_URL = 'https://growthpro-local-business-dashboard2-one.vercel.app';
+const API_BASE_URL = 'https://growthpro-local-business-dashboard2-d58o-l7ds8x17n.vercel.app/';
 
 function DashboardApp() {
   const [businessName, setBusinessName] = useState('');
@@ -29,7 +29,7 @@ function DashboardApp() {
     setIsLoading(true);
     
     try {
-      const response = await fetch('https://growthpro-local-business-dashboard2-one.vercel.app/business-data', {
+      const response = await fetch('https://growthpro-local-business-dashboard2-d58o-l7ds8x17n.vercel.app/business-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: businessName, location })
