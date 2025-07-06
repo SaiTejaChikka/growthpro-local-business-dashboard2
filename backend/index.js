@@ -4,8 +4,37 @@ import cors from 'cors';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// CORS Configuration
+const allowedOrigins = [
+  'https://growthpro-local-business-dashboard2.vercel.app',
+  // Add other environments as needed:
+  'http://localhost:3000' // For local development
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 204
+};
+
+// Apply CORS middleware
+app.use(cors(corsOptions));
+
+// Handle OPTIONS requests globally
+app.options('*', cors(corsOptions)); // Enable preflight for all routes
+
 // Middleware
-app.use(cors());
 app.use(express.json());
 
 // Sample SEO headlines
@@ -41,6 +70,10 @@ function createHeadline(name, location) {
 
 // POST /business-data
 app.post('/business-data', (req, res) => {
+  // Set security headers
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  
   const { name, location } = req.body;
 
   if (!name || !location) {
@@ -60,6 +93,10 @@ app.post('/business-data', (req, res) => {
 
 // GET /regenerate-headline
 app.get('/regenerate-headline', (req, res) => {
+  // Set security headers
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  
   const { name, location } = req.query;
 
   if (!name || !location) {
@@ -73,7 +110,13 @@ app.get('/regenerate-headline', (req, res) => {
   res.json({ headline: newHeadline });
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`✅ CORS configured for origins: ${allowedOrigins.join(', ')}`);
 });
